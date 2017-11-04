@@ -19,6 +19,7 @@ class ChatBar extends Component {
         }
         <Conversation
           users={this.props.users}
+          openChat={this.props.openChat}
         />
       </div>
     );

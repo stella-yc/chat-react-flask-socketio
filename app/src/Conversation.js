@@ -8,13 +8,15 @@ const Conversation = (props) => {
       <h5>Start a conversation</h5>
       <select
         name="users"
-        onChange={(event) => console.log(event.target.value)}
+        onChange={(event) =>
+          props.openChat(event)}
       >
         <option value="">Select a User</option>
         {
-          Object.keys(users).map(username =>
-            <option key={users[username]} value={users[username]} >{username}</option>
-          )
+          Object.keys(users).map(username => {
+            let userData = JSON.stringify({'username': username, 'sid': users[username] });
+            return <option key={users[username]} value={userData} >{username}</option>
+          })
         }
       </select>
     </div>
