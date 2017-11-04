@@ -11,7 +11,7 @@
 
 import os
 from flask import Flask, send_from_directory, request
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 app = Flask(__name__, static_folder='app/build')
 app.config['SECRET_KEY'] = 'secret!'
@@ -32,13 +32,11 @@ def serve(path):
 
 # Socketio event handlers
 
-@socketio.on('my event')
-def test_message(message):
-    emit('my response', {'data': message['data']})
-
-@socketio.on('my broadcast event')
-def test_message(message):
-    emit('my response', {'data': message['data']}, broadcast=True)
+@socketio.on('connect')
+def connect():
+    print('Connected to client: ' + request.sid)
+    emit('sid', {'data': request.sid})
+    emit('send user details', {'data': request.sid}, broadcast=True)
 
 @socketio.on('user details')
 def send_room_message(message):
@@ -51,11 +49,25 @@ def broadcast_user(message):
     print(message['data'])
     emit('new user', {'data': message['data']}, broadcast=True)
 
-@socketio.on('connect')
-def connect():
-    print('Connected to client: ' + request.sid)
-    emit('sid', {'data': request.sid})
-    emit('send user details', {'data': request.sid}, broadcast=True)
+@socketio.on('join')
+def join(message):
+    chatroom = message['room']
+    join_room(chatroom)
+    print(message['username'] + ' has entered chatroom ' + chatroom)
+    emit('chat notification',
+         {'data': {'buddy': 'notification', 'text': message['username'] + ' has entered.'}}, room=chatroom)
+    if 'buddySid' in message:
+        buddySid = message['buddySid']
+        print('buddySid in message')
+        emit('invitation', {'data': {'chatroom': chatroom, 'inviter': message['username']}}, room=buddySid);
+
+@socketio.on('send chat')
+def chatMessage(message):
+    chatroom = message['room']
+    emit('chat message',
+         { 'room': chatroom,
+         'data': message['data']
+         }, room=chatroom)
 
 @socketio.on('disconnect_request')
 def disconnect_request(message):
