@@ -2,20 +2,15 @@ import React, { Component } from 'react';
 import './App.css';
 import ChatBar from './ChatBar';
 import socket from './mySocket';
-import Chat from './Chat';
-import { deepClone } from './utils';
+import Chats from './Chats';
+import { connect } from 'react-redux';
+
+import { setSid, newUser, addUserDetails, removeUser, openChat, addMessage } from './store';
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      users: {},
-      username: '',
-      sid: '',
-      chats: {}
-    };
-    this.setUserName = this.setUserName.bind(this);
-    this.openChat = this.openChat.bind(this);
+    this.receiveMessage = this.receiveMessage.bind(this);
   }
 
   componentDidMount() {
@@ -23,170 +18,98 @@ class App extends Component {
       socket.emit('my event', {data: 'I\'m connected!'})
     });
     socket.on('sid', message => {
-      this.setState({sid: message['data']});
+      this.props.setSidToStore(message.data);
     });
     socket.on('new user', message => {
-      const { username, sid } = message.data;
-      if (sid !== this.state.sid) {
-        const userList = this.state.users;
-        const updatedUserList = Object.assign({}, userList, {[username]: sid});
-        this.setState({users: updatedUserList});
-        console.log('new user!!', sid)
-      }
+      this.props.setNewUserToStore(message.data);
     });
     socket.on('user details', message => {
-      const { username, sid } = message.data;
-      const userList = this.state.users;
-      const updatedUserList = Object.assign({}, userList, {[username]: sid});
-      this.setState({users: updatedUserList});
+      this.props.setActiveUserToStore(message.data);
     });
     socket.on('send user details', message => {
       const sid = message.data
-      if (this.state.username) {
-        socket.emit('user details', {room: sid, data: {username: this.state.username, sid: this.state.sid}});
+      if (this.props.username) {
+        socket.emit('user details', {room: sid, data: {username: this.props.username, sid: this.props.sid}});
       }
     });
     socket.on('remove user', message => {
-      console.log('remove user', message);
-      const removedUserSid = message.data;
-      const users = this.state.users;
-      const userList = Object.keys(users);
-      const updatedUsers = userList.reduce((acc, user) => {
-        if (users[user] !== removedUserSid) {
-          acc[user] = this.state.users[user];
-        }
-        return acc;
-      }, {});
-      this.setState({users: updatedUsers});
+      this.props.removeUserFromStore(message.data);
     });
     socket.on('invitation', message => {
-      console.log('invitation', message);
       const {chatroom, inviter} = message.data;
-      socket.emit('join', {'room': chatroom, 'username': this.state.username});
-      if (!this.state.chats[inviter]) {
-        const chats = this.state.chats;
-        const updatedChats = deepClone(chats);
-        updatedChats[inviter] = {
-          roomId: chatroom,
-          messages: [],
-          open: true
-        };
-        this.setState({chats: updatedChats});
-      } else {
-        this.state.chats[inviter].open = true;
-        this.state.chats[inviter].roomId = chatroom;
-      }
+      socket.emit('join', {'room': chatroom, 'username': this.props.username});
+      this.props.activateChatRoom({username: inviter, chatroom});
     });
-    socket.on('chat notification', message => {
-      console.log('Chat Notification: ', message.data.text);
-    })
     socket.on('chat message', message => {
-      console.log('Chat Message: ', message);
-      const { sender, recipient, text } = message.data;
-      const chatroom = message.room;
-      let buddy;
-      if (sender === this.state.username) {
-        buddy = recipient;
-      } else {
-        buddy = sender;
-      }
-      const chats = this.state.chats;
-      const updatedChats = deepClone(chats);
-      const chatHistory = chats[buddy].messages;
-      const updatedHistory = [...chatHistory, {sender, text}];
-      updatedChats[buddy].messages = updatedHistory;
-      this.setState({chats: updatedChats});
-      if (localStorage) {
-        localStorage.setItem(this.state.username, JSON.stringify(updatedChats));
-      }
+      this.receiveMessage(message);
     });
+  }
+
+  receiveMessage(message) {
+    const { sender, recipient, text } = message.data;
+    let buddy;
+    if (sender === this.props.username) {
+      buddy = recipient;
+    } else {
+      buddy = sender;
+    }
+    this.props.addMessageToStore(buddy, {sender, text});
+    if (localStorage) {
+      localStorage.setItem(this.props.username, JSON.stringify(this.props.chats));
+    }
   }
 
   componentWillUnmount() {
     socket.disconnect();
   }
 
-  setUserName(username) {
-    this.setState({username: username});
-    if (localStorage) {
-      console.log('localStorage');
-      let previousChats = localStorage.getItem(username);
-      previousChats = JSON.parse(previousChats);
-      console.log('previousChats', previousChats);
-      if (previousChats) {
-        Object.keys(previousChats).forEach(chat => {
-          previousChats[chat].open = false;
-        })
-        this.setState({chats: previousChats});
-      }
-    }
-
-  }
-/*
-  chats: {
-    Louie: {
-      roomId: 'asldkfjals',
-      open: true,
-      messages: [
-        {sender: 'Azula', text: 'Hi'}
-      ]
-    }
-  }
-*/
-  openChat(event) {
-    const buddy = JSON.parse(event.target.value);
-    const chats = this.state.chats;
-
-
-    console.log('openChat!!', buddy);
-    // Create unique roomID based on each sid
-    const roomId = `${buddy.sid}${this.state.sid}`;
-    socket.emit('join', {'room': roomId, 'buddySid': buddy.sid, 'username': this.state.username});
-    // open a chat window
-    const updatedChats = deepClone(chats);
-    if (!chats[buddy.username]) {
-      updatedChats[buddy.username] = {messages: []};
-    }
-    updatedChats[buddy.username].roomId = roomId;
-    updatedChats[buddy.username].open = true;
-    this.setState({chats: updatedChats});
-  }
-
   render() {
-    const chats = this.state.chats;
-    const buddies = Object.keys(chats);
     return (
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Chat Server</h1>
         </header>
-        <ChatBar
-          loggedIn={this.state.username.length > 0}
-          username={this.state.username}
-          setUserName={this.setUserName}
-          sid={this.state.sid}
-          users={this.state.users}
-          openChat={this.openChat}
-        />
+        <ChatBar />
         <button onClick={() => socket.disconnect()}>DISCONNECT</button>
-        {
-          buddies.map(buddy => {
-            if (chats[buddy].open) {
-              return (<Chat
-                key={buddy}
-                username={this.state.username}
-                buddyName={buddy}
-                roomId={chats[buddy].roomId}
-                messages={chats[buddy].messages}
-              />);
-            } else {
-              return null;
-            }
-          })
-        }
+        <Chats chats={this.props.chats}/>
       </div>
     );
   }
 }
 
-export default App;
+/*** CONTAINER ***/
+const mapState = (state) => {
+  return {
+    users: state.users,
+    username: state.username,
+    sid: state.sid,
+    chats: state.chats
+  };
+};
+
+const mapDispatch = (dispatch) => {
+  return ({
+    setSidToStore(sid) {
+      dispatch(setSid(sid));
+    },
+    setNewUserToStore(user) {
+      dispatch(newUser(user));
+    },
+    setActiveUserToStore(user) {
+      dispatch(addUserDetails(user));
+    },
+    removeUserFromStore(sid) {
+      dispatch(removeUser(sid));
+    },
+    activateChatRoom(chatInfo) {
+      dispatch(openChat(chatInfo));
+    },
+    addMessageToStore(buddy, message) {
+      dispatch(addMessage(buddy, message));
+    }
+  });
+};
+
+export default connect(mapState, mapDispatch)(App);
+
+/*** PROP TYPES ***/

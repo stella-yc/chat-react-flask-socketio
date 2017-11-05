@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
 import socket from './mySocket';
 
 import './Chat.css';
@@ -60,4 +62,14 @@ class Chat extends Component {
   }
 }
 
-export default Chat;
+/*** CONTAINER ***/
+const mapState = (state) => {
+  return {
+    users: state.users,
+    username: state.username,
+    sid: state.sid,
+    chats: state.chats
+  };
+};
+
+export default connect(mapState)(Chat);
