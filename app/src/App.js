@@ -68,9 +68,13 @@ class App extends Component {
         const updatedChats = deepClone(chats);
         updatedChats[inviter] = {
           roomId: chatroom,
-          messages: []
+          messages: [],
+          open: true
         };
         this.setState({chats: updatedChats});
+      } else {
+        this.state.chats[inviter].open = true;
+        this.state.chats[inviter].roomId = chatroom;
       }
     });
     socket.on('chat notification', message => {
@@ -92,6 +96,9 @@ class App extends Component {
       const updatedHistory = [...chatHistory, {sender, text}];
       updatedChats[buddy].messages = updatedHistory;
       this.setState({chats: updatedChats});
+      if (localStorage) {
+        localStorage.setItem(this.state.username, JSON.stringify(updatedChats));
+      }
     });
   }
 
@@ -100,9 +107,32 @@ class App extends Component {
   }
 
   setUserName(username) {
-    this.setState({username: username})
-  }
+    this.setState({username: username});
+    if (localStorage) {
+      console.log('localStorage');
+      let previousChats = localStorage.getItem(username);
+      previousChats = JSON.parse(previousChats);
+      console.log('previousChats', previousChats);
+      if (previousChats) {
+        Object.keys(previousChats).forEach(chat => {
+          previousChats[chat].open = false;
+        })
+        this.setState({chats: previousChats});
+      }
+    }
 
+  }
+/*
+  chats: {
+    Louie: {
+      roomId: 'asldkfjals',
+      open: true,
+      messages: [
+        {sender: 'Azula', text: 'Hi'}
+      ]
+    }
+  }
+*/
   openChat(event) {
     const buddy = JSON.parse(event.target.value);
     const chats = this.state.chats;
@@ -113,14 +143,13 @@ class App extends Component {
     const roomId = `${buddy.sid}${this.state.sid}`;
     socket.emit('join', {'room': roomId, 'buddySid': buddy.sid, 'username': this.state.username});
     // open a chat window
+    const updatedChats = deepClone(chats);
     if (!chats[buddy.username]) {
-      const updatedChats = deepClone(chats);
-      updatedChats[buddy.username] = {
-        'roomId': roomId,
-        messages: []
-      };
-      this.setState({chats: updatedChats});
+      updatedChats[buddy.username] = {messages: []};
     }
+    updatedChats[buddy.username].roomId = roomId;
+    updatedChats[buddy.username].open = true;
+    this.setState({chats: updatedChats});
   }
 
   render() {
@@ -141,15 +170,19 @@ class App extends Component {
         />
         <button onClick={() => socket.disconnect()}>DISCONNECT</button>
         {
-          buddies.map(buddy =>
-            <Chat
-              key={buddy}
-              username={this.state.username}
-              buddyName={buddy}
-              roomId={chats[buddy].roomId}
-              messages={chats[buddy].messages}
-            />
-          )
+          buddies.map(buddy => {
+            if (chats[buddy].open) {
+              return (<Chat
+                key={buddy}
+                username={this.state.username}
+                buddyName={buddy}
+                roomId={chats[buddy].roomId}
+                messages={chats[buddy].messages}
+              />);
+            } else {
+              return null;
+            }
+          })
         }
       </div>
     );
