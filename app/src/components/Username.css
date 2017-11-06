@@ -1,0 +1,26 @@
+.Username {
+  margin: 1em;
+}
+
+.Username-submit {
+  display: inline-block;
+}
+
+.Username-form-element {
+  display: inline-block;
+}
+
+.Username-input {
+  margin: 0 0.5em;
+  padding: 0.3em;
+  border: 1px solid gray;
+  border-radius: 3px;
+}
+
+.Username-submit {
+  padding: 0.3em 0.7em;
+  color: white;
+  background-color: #9791a7;
+  border: none;
+  border-radius: 5px;
+}

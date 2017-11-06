@@ -1,4 +1,4 @@
-import { deepClone } from './utils';
+import { deepClone } from '../utils';
 
 /*** ACTION TYPES ***/
 const SET_SID = 'SET_SID';
@@ -9,7 +9,7 @@ const REMOVE_USER = 'REMOVE_USER';
 const OPEN_CHAT = 'OPEN_CHAT';
 const ADD_MESSAGE = 'ADD_MESSAGE';
 const STORED_CHATS = 'STORED_CHATS';
-
+const CLOSE_CHAT = 'CLOSE_CHAT';
 /*** INITIAL STATE ***/
 const defaultState = {
   users: {},
@@ -35,9 +35,10 @@ export const setUsername = username => ({type: SET_USERNAME, username});
 export const newUser = user => ({type: NEW_USER, user});
 export const addUserDetails = user => ({type: USER_DETAILS, user});
 export const removeUser = sid => ({type: REMOVE_USER, sid});
-export const openChat = buddy => ({type: OPEN_CHAT, buddy });
+export const openChat = buddy => ({type: OPEN_CHAT, buddy});
 export const addMessage = (buddy, message) => ({type: ADD_MESSAGE, buddy, message});
 export const retrieveChats = chats => ({type: STORED_CHATS, chats});
+export const closeChat = buddy => ({type: CLOSE_CHAT, buddy});
 
 /*** REDUCER ***/
 export default function (state = defaultState, action) {
@@ -88,6 +89,10 @@ export default function (state = defaultState, action) {
     }
     case ADD_MESSAGE: {
       newState.chats[action.buddy].messages.push(action.message);
+      break;
+    }
+    case CLOSE_CHAT: {
+      newState.chats[action.buddy].open = false;
       break;
     }
     default:

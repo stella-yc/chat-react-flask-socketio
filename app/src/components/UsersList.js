@@ -1,10 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import socket from './mySocket';
-import { openChat } from './store';
-// import './ChatBar.css';
+import PropTypes from 'prop-types';
 
-const Conversation = (props) => {
+import socket from './mySocket';
+import { openChat } from '../store';
+import './UsersList.css';
+
+const UsersList = (props) => {
   const { users } = props;
 
   const startChat = (event) => {
@@ -19,11 +21,12 @@ const Conversation = (props) => {
   }
 
   return (
-    <div>
-      <h5>Start a conversation</h5>
+    <div className="UsersList">
+      <p className="UsersList-title">Start Chat</p>
       <select
         name="users"
         onChange={startChat}
+        className="UsersList-select"
       >
         <option value="">Select a User</option>
         {
@@ -43,7 +46,6 @@ const mapState = (state) => {
     users: state.users,
     username: state.username,
     sid: state.sid,
-    chats: state.chats
   };
 };
 
@@ -55,4 +57,12 @@ const mapDispatch = (dispatch) => {
   });
 };
 
-export default connect(mapState, mapDispatch)(Conversation);
+export default connect(mapState, mapDispatch)(UsersList);
+
+/*** PROP TYPES ***/
+UsersList.propTypes = {
+  users: PropTypes.object.isRequired,
+  username: PropTypes.string.isRequired,
+  sid: PropTypes.string.isRequired,
+  activateChatRoom: PropTypes.func.isRequired
+};

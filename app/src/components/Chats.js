@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 // import './ChatBar.css';
 
 import Chat from './Chat';
@@ -11,12 +12,14 @@ const Chats = (props) => {
       {
         buddies.map(buddy => {
           if (chats[buddy].open) {
-            return (<Chat
-              key={buddy}
-              buddyName={buddy}
-              roomId={chats[buddy].roomId}
-              messages={chats[buddy].messages}
-            />);
+            return (
+              <Chat
+                key={buddy}
+                buddyName={buddy}
+                roomId={chats[buddy].roomId}
+                messages={chats[buddy].messages}
+              />
+            );
           } else {
             return null;
           }
@@ -27,3 +30,8 @@ const Chats = (props) => {
 };
 
 export default Chats;
+
+/*** PROP TYPES ***/
+Chats.propTypes = {
+  chats: PropTypes.object.isRequired,
+};

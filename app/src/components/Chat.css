@@ -1,0 +1,66 @@
+.Chat {
+  border: 1px solid #A5A5A5;
+  background-color: white;
+  width: 50vw;
+  box-shadow: 5px 10px 10px 3px #B6B6B6;
+  margin: 1em;
+}
+
+.Chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #EAEAEA;
+  color: #422ce1;
+  padding: 1em;
+}
+
+.Chat-name {
+  margin: 0;
+}
+
+.Chat-close-button {
+  height: 2em;
+  width: 3em;
+  text-align: center;
+  border: none;
+  border-radius: 3px;
+  background-color: white;
+  color: #a9a9a9;
+}
+
+.Chat-area {
+  height: 20vh;
+}
+
+.Chat-messages {
+  list-style-type: none;
+  padding: 0;
+}
+
+.Chat-message {
+  padding: 0.2em 1em;
+}
+
+.Chat-sender {
+  font-weight: bold;
+}
+
+.Chat-footer {
+  border-top: 1px solid #a9a9a9;
+}
+
+.Chat-inputmessage {
+  font-size: 1.1em;
+  padding: 0.2em;
+  width: 80%;
+}
+
+.Chat-submit {
+  width: 20%;
+  height: 100%;
+  border: none;
+  color: #422ce1;
+  font-size: 1.1em;
+  background-color: white;
+}

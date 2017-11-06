@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import socket from './mySocket';
-
+import { closeChat } from '../store';
 import './Chat.css';
 
 class Chat extends Component {
@@ -11,8 +12,13 @@ class Chat extends Component {
     this.state = {
       inputMessage: ''
     };
-    this.sendMessage = this.sendMessage.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+    this.closeChatWindow = this.closeChatWindow.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({inputMessage: event.target.value});
   }
 
   sendMessage(event) {
@@ -25,28 +31,29 @@ class Chat extends Component {
     this.setState({inputMessage: ''});
   }
 
-  handleChange(event) {
-    this.setState({inputMessage: event.target.value});
+  closeChatWindow() {
+    this.props.setClosedChatToStore(this.props.buddyName);
   }
 
   render() {
     const { buddyName, messages } = this.props;
     return (
       <div className="Chat">
-        <div>
-          <h4>{buddyName}</h4>
+        <div className="Chat-header">
+          <h4 className="Chat-name">{buddyName}</h4>
+          <button className="Chat-close-button"onClick={this.closeChatWindow}>X</button>
         </div>
         <div className="Chat-area">
           <ul className="Chat-messages">
-            {messages.map(msg =>
-              <li>
+            {messages.map((msg, idx) =>
+              <li key={idx} className="Chat-message">
                 <span className="Chat-sender">{`${msg.sender}: `}</span>
                 <span className="Chat-text">{msg.text}</span>
               </li>
             )}
           </ul>
         </div>
-        <form onSubmit={this.sendMessage}>
+        <form onSubmit={this.sendMessage} className="Chat-footer">
           <input
             className="Chat-inputmessage"
             type="text"
@@ -55,7 +62,7 @@ class Chat extends Component {
             onChange={this.handleChange}
             value={this.state.inputMessage}
           />
-          <input type="submit" value="Send"/>
+          <input type="submit" value="Send" className="Chat-submit"/>
         </form>
       </div>
     );
@@ -65,11 +72,23 @@ class Chat extends Component {
 /*** CONTAINER ***/
 const mapState = (state) => {
   return {
-    users: state.users,
     username: state.username,
-    sid: state.sid,
-    chats: state.chats
   };
 };
 
-export default connect(mapState)(Chat);
+const mapDispatch = (dispatch) => {
+  return ({
+    setClosedChatToStore(buddy) {
+      dispatch(closeChat(buddy));
+    }
+  });
+};
+export default connect(mapState, mapDispatch)(Chat);
+
+/*** PROP TYPES ***/
+Chat.propTypes = {
+  username: PropTypes.string.isRequired,
+  buddyName: PropTypes.string.isRequired,
+  roomId: PropTypes.string.isRequired,
+  messages: PropTypes.array.isRequired,
+};

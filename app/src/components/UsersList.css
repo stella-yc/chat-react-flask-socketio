@@ -1,0 +1,8 @@
+.UsersList-title {
+  display: inline-block;
+}
+
+.UsersList-select {
+  display: inline-block;
+  margin: 0 0.5em;
+}

@@ -1,14 +1,3 @@
-# from flask import Flask, render_template, send_from_directory
-#
-# app = Flask(__name__)
-#
-# @app.route("/")
-# def index(path):
-#     return send_from_directory('app/public', 'index.html')
-#
-# if __name__ == "__main__":
-#     app.run()
-
 import os
 from flask import Flask, send_from_directory, request
 from flask_socketio import SocketIO, emit, join_room, leave_room

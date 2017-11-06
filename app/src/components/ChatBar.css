@@ -1,0 +1,11 @@
+.ChatBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid #9791a7;
+  background-color: white;
+}
+
+.ChatBar-element {
+  padding: 0 1em;
+}
