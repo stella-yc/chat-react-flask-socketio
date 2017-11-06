@@ -33,6 +33,9 @@ class Chat extends Component {
 
   closeChatWindow() {
     this.props.setClosedChatToStore(this.props.buddyName);
+    const { setClosedChatToStore, buddyName, roomId, username } = this.props;
+    socket.emit('leaving chatroom',
+         {'room': roomId, 'data': {'sender': username, 'text': username + ' has left.', 'recipient': buddyName}})
   }
 
   render() {
@@ -102,4 +105,5 @@ Chat.propTypes = {
   buddyName: PropTypes.string.isRequired,
   roomId: PropTypes.string.isRequired,
   messages: PropTypes.array.isRequired,
+  setClosedChatToStore: PropTypes.func.isRequired
 };

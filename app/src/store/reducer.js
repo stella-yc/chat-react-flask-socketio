@@ -10,6 +10,7 @@ const OPEN_CHAT = 'OPEN_CHAT';
 const ADD_MESSAGE = 'ADD_MESSAGE';
 const STORED_CHATS = 'STORED_CHATS';
 const CLOSE_CHAT = 'CLOSE_CHAT';
+
 /*** INITIAL STATE ***/
 const defaultState = {
   users: {}, // populated object looks like { Louie: 'thisIsSidString' }

@@ -55,7 +55,7 @@ class App extends Component {
     });
     socket.on('invitation', message => {
       const {chatroom, inviter} = message.data;
-      socket.emit('join', {'room': chatroom, 'username': this.props.username, 'buddyName': inviter});
+      socket.emit('accept invitation', {'room': chatroom, 'username': this.props.username, 'buddyName': inviter});
       this.props.activateChatRoom({username: inviter, chatroom});
     });
     socket.on('chat message', message => {
@@ -93,6 +93,20 @@ class App extends Component {
 
 
   componentWillUnmount() {
+    const chatList = Object.keys(this.props.chats);
+    const username = this.props.username;
+    chatList.forEach(buddy => {
+      socket.emit(
+        'leaving chatroom',{
+          'room': chatList[buddy].roomId,
+           'data': {
+             'sender': username,
+             'text': username + ' has left.',
+             'recipient': buddy
+           }
+         }
+         )
+    });
     socket.disconnect();
   }
 
@@ -101,7 +115,6 @@ class App extends Component {
       <div className="App">
         <Header />
         <ChatBar />
-        <button onClick={() => socket.disconnect()}>DISCONNECT</button>
         <Chats chats={this.props.chats}/>
       </div>
     );

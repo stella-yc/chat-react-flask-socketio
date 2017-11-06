@@ -52,6 +52,7 @@ const mapState = (state) => {
     users: state.users,
     username: state.username,
     sid: state.sid,
+    chats: state.chats
   };
 };
 
@@ -70,5 +71,6 @@ UsersList.propTypes = {
   users: PropTypes.object.isRequired,
   username: PropTypes.string.isRequired,
   sid: PropTypes.string.isRequired,
-  activateChatRoom: PropTypes.func.isRequired
+  activateChatRoom: PropTypes.func.isRequired,
+  chats: PropTypes.object.isRequired,
 };
