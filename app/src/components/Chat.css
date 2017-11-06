@@ -45,6 +45,11 @@
   padding: 0.2em 1em;
 }
 
+.Chat-notification {
+  color: #a9a9a9;
+  font-style: italic;
+}
+
 .Chat-sender {
   font-weight: bold;
 }

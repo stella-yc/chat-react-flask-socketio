@@ -1,6 +1,10 @@
 import io from 'socket.io-client';
 
-const socket = io.connect(window.location.protocol + '//' + document.domain + ':5000');
-// const socket = io.connect(window.location.protocol + '//' + document.domain + ':' + window.location.port);
+let socket;
+if (process.env.NODE_ENV === 'development') {
+  socket = io.connect(window.location.protocol + '//' + document.domain + ':5000');
+} else {
+  socket = io.connect(window.location.protocol + '//' + document.domain + ':' + window.location.port);
+}
 
 export default socket;

@@ -18,6 +18,7 @@ const UsersList = (props) => {
       const roomId = `${buddy.sid}${props.sid}`; // Create unique roomID based on each sid
       socket.emit('join', {
         'room': roomId,
+        'buddyName': buddy.username,
         'buddySid': buddy.sid,
         'username': props.username
       });

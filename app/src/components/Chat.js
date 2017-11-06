@@ -45,12 +45,23 @@ class Chat extends Component {
         </div>
         <div className="Chat-area">
           <ul className="Chat-messages">
-            {messages.map((msg, idx) =>
-              <li key={idx} className="Chat-message">
-                <span className="Chat-sender">{`${msg.sender}: `}</span>
-                <span className="Chat-text">{msg.text}</span>
-              </li>
-            )}
+            {
+              messages.map((msg, idx) => {
+                if (msg.sender === 'Notification') {
+                  return (
+                    <li key={idx} className="Chat-message">
+                      <span className="Chat-notification">{msg.text}</span>
+                    </li>
+                  );
+                } else {
+                  return (
+                    <li key={idx} className="Chat-message">
+                      <span className="Chat-sender">{`${msg.sender}: `}</span>
+                      <span className="Chat-text">{msg.text}</span>
+                    </li>
+                  );
+                }})
+            }
           </ul>
         </div>
         <form onSubmit={this.sendMessage} className="Chat-footer">

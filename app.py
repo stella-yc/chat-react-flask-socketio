@@ -23,32 +23,39 @@ def serve(path):
 
 @socketio.on('connect')
 def connect():
-    print('Connected to client: ' + request.sid)
+    # Send the user their unique sid
     emit('sid', {'data': request.sid})
+    # Tell all active users to send their user information to newly logged in user
     emit('send user details', {'data': request.sid}, broadcast=True)
 
 @socketio.on('user details')
 def send_room_message(message):
+    # send user details to the newly logged-in user
     emit('user details',
          {'data': message['data']},
          room=message['room'])
 
 @socketio.on('register user')
 def broadcast_user(message):
-    print(message['data'])
+    # sends newly logged-in user details to all active users
     emit('new user', {'data': message['data']}, broadcast=True)
 
 @socketio.on('join')
 def join(message):
+    # join chatroom
     chatroom = message['room']
+    user = message['username']
+    recipient = message['buddyName']
     join_room(chatroom)
-    print(message['username'] + ' has entered chatroom ' + chatroom)
-    emit('chat notification',
-         {'data': {'buddy': 'notification', 'text': message['username'] + ' has entered.'}}, room=chatroom)
+    # invite chat buddy
     if 'buddySid' in message:
         buddySid = message['buddySid']
         print('buddySid in message')
         emit('invitation', {'data': {'chatroom': chatroom, 'inviter': message['username']}}, room=buddySid);
+    # Log that user has entered the chatroom
+    print(user + ' has entered chatroom ' + chatroom)
+    emit('chat notification',
+         {'data': {'sender': user, 'text': user + ' has entered.', 'recipient': recipient}}, room=chatroom)
 
 @socketio.on('send chat')
 def chatMessage(message):
@@ -62,8 +69,8 @@ def chatMessage(message):
 def disconnect_request(message):
     print('disconnect request')
     emit('remove user', message['data'], broadcast=True)
-    emit('my_response',
-         {'data': 'Disconnected!'})
+    emit('chat notification',
+         {'data': {'sender': user, 'text': user + ' has left.', 'recipient': recipient}}, room=chatroom)
     disconnect()
 
 @socketio.on('disconnect')

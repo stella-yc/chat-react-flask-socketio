@@ -7,6 +7,7 @@ import ChatBar from './ChatBar';
 import socket from './mySocket';
 import Chats from './Chats';
 import Header from './Header';
+import { doesNotMatch } from '../utils';
 import {
   setSid,
   newUser,
@@ -20,9 +21,11 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.receiveMessage = this.receiveMessage.bind(this);
+    this.receiveNotification = this.receiveNotification.bind(this);
   }
 
   componentDidMount() {
+    // Attaching event listeners to the socket
     socket.on('connect', () => {
       socket.emit('my event', {data: 'I\'m connected!'})
     });
@@ -52,24 +55,33 @@ class App extends Component {
     });
     socket.on('invitation', message => {
       const {chatroom, inviter} = message.data;
-      socket.emit('join', {'room': chatroom, 'username': this.props.username});
+      socket.emit('join', {'room': chatroom, 'username': this.props.username, 'buddyName': inviter});
       this.props.activateChatRoom({username: inviter, chatroom});
     });
     socket.on('chat message', message => {
       this.receiveMessage(message);
     });
+    socket.on('chat notification', message => {
+      this.receiveNotification(message);
+    });
   }
 
   receiveMessage(message) {
     const { sender, recipient, text } = message.data;
-    let buddy;
-    if (sender === this.props.username) {
-      buddy = recipient;
-    } else {
-      buddy = sender;
-    }
+    const buddy = doesNotMatch(this.props.username, sender, recipient);
     this.props.addMessageToStore(buddy, {sender, text});
-    this.saveChatsToLocalStorage(this.props.username, JSON.stringify(this.props.chats));
+  }
+
+  receiveNotification(message) {
+    const { sender, recipient, text } = message.data;
+    const buddy = doesNotMatch(this.props.username, sender, recipient);
+    this.props.addMessageToStore(buddy, {sender: 'Notification', text});
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.chats !== this.props.chats) {
+      this.saveChatsToLocalStorage(this.props.username, JSON.stringify(nextProps.chats));
+    }
   }
 
   saveChatsToLocalStorage(username, chats) {
@@ -77,6 +89,8 @@ class App extends Component {
       localStorage.setItem(username, chats);
     }
   }
+
+
 
   componentWillUnmount() {
     socket.disconnect();

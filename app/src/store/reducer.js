@@ -12,11 +12,11 @@ const STORED_CHATS = 'STORED_CHATS';
 const CLOSE_CHAT = 'CLOSE_CHAT';
 /*** INITIAL STATE ***/
 const defaultState = {
-  users: {},
+  users: {}, // populated object looks like { Louie: 'thisIsSidString' }
   username: '',
   sid: '',
   chats: {}
-  /* How a populated chats object looks
+  /* How a populated chats object would look
     chats: {
       Louie: {
         roomId: 'asldkfjals',
