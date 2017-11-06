@@ -1,0 +1,4 @@
+.Chats {
+  display: flex;
+  flex-flow: row wrap;
+}

@@ -10,14 +10,19 @@ const UsersList = (props) => {
   const { users } = props;
 
   const startChat = (event) => {
-    const buddy = JSON.parse(event.target.value);
-    const roomId = `${buddy.sid}${props.sid}`; // Create unique roomID based on each sid
-    socket.emit('join', {
-      'room': roomId,
-      'buddySid': buddy.sid,
-      'username': props.username
-    });
-    props.activateChatRoom({username: buddy.username, chatroom: roomId});
+    if (!props.username.length) {
+      return alert('You must first enter your Name');
+    }
+    if (event.target.value !== "") {
+      const buddy = JSON.parse(event.target.value);
+      const roomId = `${buddy.sid}${props.sid}`; // Create unique roomID based on each sid
+      socket.emit('join', {
+        'room': roomId,
+        'buddySid': buddy.sid,
+        'username': props.username
+      });
+      props.activateChatRoom({username: buddy.username, chatroom: roomId});
+    }
   }
 
   return (

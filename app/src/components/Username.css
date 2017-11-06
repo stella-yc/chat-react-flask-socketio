@@ -2,10 +2,6 @@
   margin: 1em;
 }
 
-.Username-submit {
-  display: inline-block;
-}
-
 .Username-form-element {
   display: inline-block;
 }
@@ -18,7 +14,8 @@
 }
 
 .Username-submit {
-  padding: 0.3em 0.7em;
+  display: inline-block;
+  padding: 0.5em 0.8em;
   color: white;
   background-color: #9791a7;
   border: none;
