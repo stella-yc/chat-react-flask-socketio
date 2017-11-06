@@ -32,10 +32,9 @@ class Chat extends Component {
   }
 
   closeChatWindow() {
-    this.props.setClosedChatToStore(this.props.buddyName);
-    const { setClosedChatToStore, buddyName, roomId, username } = this.props;
-    socket.emit('leaving chatroom',
-         {'room': roomId, 'data': {'sender': username, 'text': username + ' has left.', 'recipient': buddyName}})
+    const { roomId, buddyName, setClosedChatToStore } = this.props;
+    setClosedChatToStore(buddyName);
+    socket.emit('leaving chatroom', {'room': roomId});
   }
 
   render() {

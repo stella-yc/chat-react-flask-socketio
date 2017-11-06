@@ -21,7 +21,6 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.receiveMessage = this.receiveMessage.bind(this);
-    this.receiveNotification = this.receiveNotification.bind(this);
   }
 
   componentDidMount() {
@@ -61,21 +60,12 @@ class App extends Component {
     socket.on('chat message', message => {
       this.receiveMessage(message);
     });
-    socket.on('chat notification', message => {
-      this.receiveNotification(message);
-    });
   }
 
   receiveMessage(message) {
     const { sender, recipient, text } = message.data;
     const buddy = doesNotMatch(this.props.username, sender, recipient);
     this.props.addMessageToStore(buddy, {sender, text});
-  }
-
-  receiveNotification(message) {
-    const { sender, recipient, text } = message.data;
-    const buddy = doesNotMatch(this.props.username, sender, recipient);
-    this.props.addMessageToStore(buddy, {sender: 'Notification', text});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -90,23 +80,7 @@ class App extends Component {
     }
   }
 
-
-
   componentWillUnmount() {
-    const chatList = Object.keys(this.props.chats);
-    const username = this.props.username;
-    chatList.forEach(buddy => {
-      socket.emit(
-        'leaving chatroom',{
-          'room': chatList[buddy].roomId,
-           'data': {
-             'sender': username,
-             'text': username + ' has left.',
-             'recipient': buddy
-           }
-         }
-         )
-    });
     socket.disconnect();
   }
 

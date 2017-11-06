@@ -52,24 +52,13 @@ def join(message):
         buddySid = message['buddySid']
         print('buddySid in message')
         emit('invitation', {'data': {'chatroom': chatroom, 'inviter': message['username']}}, room=buddySid);
-    # Log that user has entered the chatroom
-    # print(user + ' has entered chatroom ' + chatroom)
-    # emit('chat notification',
-        # {'data': {'sender': user, 'text': user + ' has entered.', 'recipient': recipient}}, room=chatroom)
 
 @socketio.on('accept invitation')
 def acceptInvite(message):
-    # join chatroom
     chatroom = message['room']
     user = message['username']
     buddy = message['buddyName']
     join_room(chatroom)
-    # Log that user has entered the chatroom
-    print(user + ' has entered chatroom ' + chatroom)
-    emit('chat notification',
-         {'data': {'sender': buddy, 'text': buddy + ' has entered.', 'recipient': user}}, room=chatroom)
-    emit('chat notification',
-         {'data': {'sender': user, 'text': user + ' has entered.', 'recipient': buddy}}, room=chatroom)
 
 @socketio.on('send chat')
 def chatMessage(message):
@@ -82,20 +71,7 @@ def chatMessage(message):
 @socketio.on('leaving chatroom')
 def chatMessage(message):
     chatroom = message['room']
-    user = message['data']['sender']
-    recipient = message['data']['recipient']
-    text = message['data']['text']
-    emit('chat notification',
-         {'data': {'sender': user, 'text': text, 'recipient': recipient}}, room=chatroom)
     leave_room(chatroom)
-
-@socketio.on('disconnect_request')
-def disconnect_request(message):
-    print('disconnect request')
-    emit('remove user', message['data'], broadcast=True)
-    emit('chat notification',
-         {'data': {'sender': user, 'text': user + ' has left.', 'recipient': recipient}}, room=chatroom)
-    disconnect()
 
 @socketio.on('disconnect')
 def on_disconnect():
