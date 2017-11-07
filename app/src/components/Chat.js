@@ -15,26 +15,64 @@ class Chat extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.closeChatWindow = this.closeChatWindow.bind(this);
+    this.placeholderText = this.placeholderText.bind(this);
+    this.scrollToBottom = this.scrollToBottom.bind(this);
   }
 
   handleChange(event) {
-    this.setState({inputMessage: event.target.value});
+    if (!this.props.frozen) {
+      this.setState({inputMessage: event.target.value});
+    }
   }
 
   sendMessage(event) {
     event.preventDefault();
-    const text = this.state.inputMessage;
-    const sender = this.props.username;
-    const recipient = this.props.buddyName;
-    const data = { sender, text, recipient };
-    socket.emit('send chat', {room: this.props.roomId, data});
-    this.setState({inputMessage: ''});
+    // if chat buddy has left, don't want to allow user to keep sending messages
+    // to an empty chatroom!
+    if (!this.props.frozen) {
+      const text = this.state.inputMessage;
+      const sender = this.props.username;
+      const recipient = this.props.buddyName;
+      const data = { sender, text, recipient };
+      socket.emit('send chat', {room: this.props.roomId, data});
+      this.setState({inputMessage: ''});
+    }
+  }
+
+  placeholderText(frozen) {
+    // if chat buddy has left, don't want to allow user to keep sending messages
+    // to an empty chatroom!
+    if (!frozen) {
+      return 'Type here...';
+    } else {
+      return `${this.props.buddyName} has left!`;
+    }
+  }
+
+  scrollToBottom() {
+    const scrollHeight = this.chatArea.scrollHeight;
+    const height = this.chatArea.clientHeight;
+    const maxScrollTop = scrollHeight - height;
+    this.chatArea.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+  }
+
+  componentDidMount() {
+   this.scrollToBottom();
+  }
+
+  componentDidUpdate() {
+    this.scrollToBottom();
   }
 
   closeChatWindow() {
-    const { roomId, buddyName, setClosedChatToStore } = this.props;
+    const { roomId, buddyName, setClosedChatToStore, username } = this.props;
     setClosedChatToStore(buddyName);
-    socket.emit('leaving chatroom', {'room': roomId});
+    socket.emit('leaving chatroom', {
+      'room': roomId,
+      'data': {
+        'sender': username,
+        'recipient': buddyName
+      }});
   }
 
   render() {
@@ -45,24 +83,20 @@ class Chat extends Component {
           <h4 className="Chat-name">{buddyName}</h4>
           <button className="Chat-close-button"onClick={this.closeChatWindow}>X</button>
         </div>
-        <div className="Chat-area">
+        <div
+          className="Chat-area"
+          ref={(el) => this.chatArea = el}
+        >
           <ul className="Chat-messages">
             {
               messages.map((msg, idx) => {
-                if (msg.sender === 'Notification') {
-                  return (
-                    <li key={idx} className="Chat-message">
-                      <span className="Chat-notification">{msg.text}</span>
-                    </li>
-                  );
-                } else {
-                  return (
-                    <li key={idx} className="Chat-message">
-                      <span className="Chat-sender">{`${msg.sender}: `}</span>
-                      <span className="Chat-text">{msg.text}</span>
-                    </li>
-                  );
-                }})
+                return (
+                  <li key={idx} className="Chat-message">
+                    <span className="Chat-sender">{`${msg.sender}: `}</span>
+                    <span className="Chat-text">{msg.text}</span>
+                  </li>
+                );
+              })
             }
           </ul>
         </div>
@@ -71,7 +105,7 @@ class Chat extends Component {
             className="Chat-inputmessage"
             type="text"
             name="inputMessage"
-            placeholder="Type here..."
+            placeholder={this.placeholderText(this.props.frozen)}
             onChange={this.handleChange}
             value={this.state.inputMessage}
           />
@@ -104,5 +138,6 @@ Chat.propTypes = {
   buddyName: PropTypes.string.isRequired,
   roomId: PropTypes.string.isRequired,
   messages: PropTypes.array.isRequired,
+  frozen: PropTypes.bool,
   setClosedChatToStore: PropTypes.func.isRequired
 };

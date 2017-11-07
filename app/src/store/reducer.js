@@ -10,6 +10,7 @@ const OPEN_CHAT = 'OPEN_CHAT';
 const ADD_MESSAGE = 'ADD_MESSAGE';
 const STORED_CHATS = 'STORED_CHATS';
 const CLOSE_CHAT = 'CLOSE_CHAT';
+const FREEZE_CHAT = 'FREEZE_CHAT';
 
 /*** INITIAL STATE ***/
 const defaultState = {
@@ -24,7 +25,8 @@ const defaultState = {
         open: true,
         messages: [
           {sender: 'Azula', text: 'Hi'}
-        ]
+        ],
+        frozen: false
       }
     }
   */
@@ -40,6 +42,7 @@ export const openChat = buddy => ({type: OPEN_CHAT, buddy});
 export const addMessage = (buddy, message) => ({type: ADD_MESSAGE, buddy, message});
 export const retrieveChats = chats => ({type: STORED_CHATS, chats});
 export const closeChat = buddy => ({type: CLOSE_CHAT, buddy});
+export const freezeChat = buddy => ({type: FREEZE_CHAT, buddy});
 
 /*** REDUCER ***/
 export default function (state = defaultState, action) {
@@ -80,11 +83,13 @@ export default function (state = defaultState, action) {
         newState.chats[action.buddy.username] = {
           roomId: action.buddy.chatroom,
           messages: [],
-          open: true
+          open: true,
+          frozen: false
         };
       } else {
         newState.chats[action.buddy.username].open = true;
         newState.chats[action.buddy.username].roomId = action.buddy.chatroom;
+        newState.chats[action.buddy.username].frozen = false;
       }
       break;
     }
@@ -94,6 +99,11 @@ export default function (state = defaultState, action) {
     }
     case CLOSE_CHAT: {
       newState.chats[action.buddy].open = false;
+      break;
+    }
+    case FREEZE_CHAT: {
+      console.log(action.buddy)
+      newState.chats[action.buddy].frozen = true;
       break;
     }
     default:

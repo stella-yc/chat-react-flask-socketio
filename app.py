@@ -50,7 +50,6 @@ def join(message):
     # invite chat buddy
     if 'buddySid' in message:
         buddySid = message['buddySid']
-        print('buddySid in message')
         emit('invitation', {'data': {'chatroom': chatroom, 'inviter': message['username']}}, room=buddySid);
 
 @socketio.on('accept invitation')
@@ -71,6 +70,7 @@ def chatMessage(message):
 @socketio.on('leaving chatroom')
 def chatMessage(message):
     chatroom = message['room']
+    emit('buddy left room', {'data': message['data']}, room=chatroom)
     leave_room(chatroom)
 
 @socketio.on('disconnect')

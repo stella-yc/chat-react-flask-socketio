@@ -18,6 +18,7 @@ const Chats = (props) => {
                 buddyName={buddy}
                 roomId={chats[buddy].roomId}
                 messages={chats[buddy].messages}
+                frozen={chats[buddy].frozen}
               />
             );
           } else {

@@ -14,13 +14,15 @@ import {
   addUserDetails,
   removeUser,
   openChat,
-  addMessage
+  addMessage,
+  freezeChat
 } from '../store';
 
-class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props);
     this.receiveMessage = this.receiveMessage.bind(this);
+    this.disableChatWindow = this.disableChatWindow.bind(this);
   }
 
   componentDidMount() {
@@ -60,6 +62,17 @@ class App extends Component {
     socket.on('chat message', message => {
       this.receiveMessage(message);
     });
+    socket.on('buddy left room', message => {
+      this.disableChatWindow(message.data);
+
+    })
+  }
+
+  disableChatWindow(data) {
+    const { sender, recipient } = data;
+    if (sender !== this.props.username) {
+      this.props.disableChat(sender);
+    }
   }
 
   receiveMessage(message) {
@@ -74,6 +87,7 @@ class App extends Component {
     }
   }
 
+  // To maintain chat history without using database, using localStorage
   saveChatsToLocalStorage(username, chats) {
     if (localStorage) {
       localStorage.setItem(username, chats);
@@ -124,6 +138,9 @@ const mapDispatch = (dispatch) => {
     },
     addMessageToStore(buddy, message) {
       dispatch(addMessage(buddy, message));
+    },
+    disableChat(buddy) {
+      dispatch(freezeChat(buddy));
     }
   });
 };
