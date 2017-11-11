@@ -15,7 +15,8 @@ import {
   removeUser,
   openChat,
   addMessage,
-  freezeChat
+  freezeChat,
+  ChatMessage
 } from '../store';
 
 export class App extends Component {
@@ -69,7 +70,7 @@ export class App extends Component {
   }
 
   disableChatWindow(data) {
-    const { sender, recipient } = data;
+    const { sender } = data;
     if (sender !== this.props.username) {
       this.props.disableChat(sender);
     }
@@ -78,7 +79,8 @@ export class App extends Component {
   receiveMessage(message) {
     const { sender, recipient, text } = message.data;
     const buddy = doesNotMatch(this.props.username, sender, recipient);
-    this.props.addMessageToStore(buddy, {sender, text});
+    const chatmsg = new ChatMessage(sender, text);
+    this.props.addMessageToStore(buddy, chatmsg);
   }
 
   componentWillReceiveProps(nextProps) {

@@ -32,6 +32,24 @@ const defaultState = {
   */
 };
 
+export class ChatMessage {
+  constructor(sender, text) {
+    this.sender = sender;
+    this.text = text;
+  }
+}
+
+export class ChatLog {
+  constructor(chatRoomId, isOpen=true, isFrozen=false) {
+    this.roomId = chatRoomId;
+    this.open = isOpen;
+    this.messages = [];
+    this.frozen = isFrozen;
+  }
+}
+
+
+
 /*** ACTION CREATORS ***/
 export const setSid = sid => ({type: SET_SID, sid});
 export const setUsername = username => ({type: SET_USERNAME, username});
@@ -79,17 +97,13 @@ export default function (state = defaultState, action) {
       break;
     }
     case OPEN_CHAT: {
-      if (!state.chats[action.buddy.username]) {
-        newState.chats[action.buddy.username] = {
-          roomId: action.buddy.chatroom,
-          messages: [],
-          open: true,
-          frozen: false
-        };
+      const { username, chatroom } = action.buddy;
+      if (!state.chats[username]) {
+        newState.chats[username] = new ChatLog(chatroom);
       } else {
-        newState.chats[action.buddy.username].open = true;
-        newState.chats[action.buddy.username].roomId = action.buddy.chatroom;
-        newState.chats[action.buddy.username].frozen = false;
+        newState.chats[username].open = true;
+        newState.chats[username].roomId = chatroom;
+        newState.chats[username].frozen = false;
       }
       break;
     }
@@ -102,7 +116,6 @@ export default function (state = defaultState, action) {
       break;
     }
     case FREEZE_CHAT: {
-      console.log(action.buddy)
       newState.chats[action.buddy].frozen = true;
       break;
     }
