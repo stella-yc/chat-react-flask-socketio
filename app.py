@@ -82,4 +82,4 @@ def on_disconnect():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(use_reloader=True, port=5000, threaded=True)
+    app.run(use_reloader=True, port=port, threaded=True)
